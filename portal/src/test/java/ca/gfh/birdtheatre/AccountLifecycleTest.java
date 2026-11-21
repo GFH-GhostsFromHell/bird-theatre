@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /** Exercises real auth services and database while replacing SMTP with a mock sender. */
-@SpringBootTest(properties="bird.mail.from=test-sender@example.test")
+@SpringBootTest(properties={"bird.mail.from=test-sender@example.test", "bird.mail.smtp-enabled=true"})
 @AutoConfigureMockMvc
 class AccountLifecycleTest {
     @Autowired MockMvc mvc;
