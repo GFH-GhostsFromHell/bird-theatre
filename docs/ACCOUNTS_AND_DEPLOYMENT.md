@@ -51,9 +51,33 @@ is necessary because **Render Free blocks outgoing SMTP 25, 465 and 587**.
 Mailjet API key/secret and verified sender, subject to the account's shared
 sending limits. The two apps do not share member accounts, sessions or codes.
 
-### Copy existing Mailjet settings securely in Render
+### Automatic secure credential reuse (configured)
 
-1. Open the existing Electrical Workbench web service at
+The `render.yaml` Blueprint now uses Render's `fromService.envVarKey` feature
+to reference the existing `remote-javafx-portal` service's secrets without
+copying their values through GitHub or ChatGPT:
+
+| Bird Theatre variable | Existing Electrical Workbench variable |
+|---|---|
+| `BIRD_MAILJET_API_KEY` | `SPRING_MAIL_USERNAME` |
+| `BIRD_MAILJET_SECRET_KEY` | `SPRING_MAIL_PASSWORD` |
+| `BIRD_MAIL_FROM` | `MAIL_FROM` |
+
+Render accepted the Blueprint sync with these cross-service references on
+November 21, 2026. This creates **no additional mail provider or database**
+and does not change Electrical Workbench's values. Mailjet API v3.1 sends
+over HTTPS port 443 from the Bird Theatre free web service.
+
+**To verify:** visit
+https://bird-theatre-h7xq.onrender.com/api/v1/auth/options
+and look for `"emailConfigured":true`, then send one real verification
+email to an address you control. Presence of credentials does not by itself
+prove Mailjet accepted a message or delivered it to an inbox.
+
+### Manual fallback if the existing secret keys are renamed
+
+
+1. **Only if automatic references stop working:** Open the existing Electrical Workbench web service at
    https://dashboard.render.com/web/srv-dbj3eoc9v7es73916h1g,
    then **Environment**. Locate its Mailjet SMTP credentials. Common Spring
    names are `SPRING_MAIL_USERNAME` (Mailjet API/public key),
@@ -79,9 +103,9 @@ sending limits. The two apps do not share member accounts, sessions or codes.
    email, then confirm sign-in and password recovery.
 
 **Do not enter secret keys into ChatGPT messages or the public repository.**
-The available Render integration cannot read or copy masked environment secrets
-from Electrical Workbench, so the cross-service credential copying must be
-completed securely within Render's Environment settings. A dedicated Mailjet
+The Render integration cannot reveal masked secrets. The Blueprint's
+`fromService` references reuse them securely. You only need to copy values
+manually if the existing Electrical Workbench environment variable names change. A dedicated Mailjet
 sub-account/API key is preferable when Bird Theatre becomes public.
 
 When credentials are absent, Bird Theatre deliberately reports registration
