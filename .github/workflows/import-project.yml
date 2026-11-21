@@ -46,6 +46,14 @@ jobs:
               raise SystemExit(f"Expected 62 files; got {len(paths)}")
           print("Extracted", len(paths), "files")
           PY
+      - name: Export build workflow definitions for authorized GitHub publishing
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          sources = {str(p): p.read_text(encoding='utf-8') for p in sorted(Path('.github/workflows').glob('*.yml')) if p.name != 'import-project.yml'}
+          print('WORKFLOW_SOURCE_JSON=' + json.dumps(sources, ensure_ascii=True))
+          PY
       - name: Commit the extracted project
         run: |
           git config user.name 'github-actions[bot]'
