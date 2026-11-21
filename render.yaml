@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: bird-theatre
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      - key: SERVER_PORT
+        value: '10000'
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bird-theatre-db
+          property: connectionString
+
+databases:
+  - name: bird-theatre-db
+    plan: basic-256mb
+    region: ohio
+    ipAllowList: []

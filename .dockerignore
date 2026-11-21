@@ -1,0 +1,10 @@
+.git
+.github
+android-client
+desktop-client
+ios-client
+edge-agent
+**/target
+**/build
+.env
+*.md

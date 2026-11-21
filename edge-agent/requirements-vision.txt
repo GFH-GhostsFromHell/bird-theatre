@@ -1,0 +1,6 @@
+# First install a compatible torch + torchvision pair using pytorch.org selector.
+# Actual model weights download on first launch; no checkpoints are bundled.
+numpy>=1.26,<3
+opencv-python-headless>=4.9,<5
+Pillow>=10,<13
+open-clip-torch>=2.30,<4

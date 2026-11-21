@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102922">
+  <meta name="description" content="Bird Theatre — live bird feeder and nest box cameras, visitor sightings and community wildlife stories.">
+  <title>Bird Theatre · Every visitor has a story</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#explore" aria-label="Bird Theatre home"><span class="brand-mark">✦</span><span><strong>bird</strong><br><strong>theatre.</strong></span></a>
+      <p class="side-caption">THE COMMUNITY</p>
+      <nav id="navigation" class="navigation">
+        <a href="#explore" data-route="explore"><span aria-hidden="true">⌂</span> Explore cameras</a>
+        <a href="#cameras" data-route="cameras"><span aria-hidden="true">▣</span> My bird stations</a>
+        <a href="#sightings" data-route="sightings"><span aria-hidden="true">◉</span> Sightings & stats</a>
+        <a href="#alerts" data-route="alerts"><span aria-hidden="true">♧</span> Bird alerts</a>
+        <a href="#rfid" data-route="rfid"><span aria-hidden="true">⌁</span> RFID bird tags</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-illustration" aria-hidden="true"><span>🌿</span><span>🐦</span></div>
+        <p><strong>Nature happens here.</strong><br>Share the little moments worth watching.</p>
+        <span class="sidebar-footnote">BIRD THEATRE · EARLY PREVIEW</span>
+      </div>
+    </aside>
+    <div class="main-wrap">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark">✦</span><strong>bird theatre.</strong></div>
+        <div class="eyebrow">A WINDOW INTO THE WILD <span class="eyebrow-dot"></span> ALL AROUND THE WORLD</div>
+        <div id="member-actions" class="member-actions"><button id="open-auth" class="small-button">Join the community</button></div>
+      </header>
+      <main id="content" class="content" tabindex="-1" aria-live="polite"></main>
+      <footer class="footer"><span>Made for bird lovers, backyard naturalists & curious humans.</span><span>Share responsibly • Respect nesting wildlife</span></footer>
+    </div>
+  </div>
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="#explore" data-route="explore">⌂<span>Explore</span></a>
+    <a href="#cameras" data-route="cameras">▣<span>Stations</span></a>
+    <a href="#sightings" data-route="sightings">◉<span>Visits</span></a>
+    <a href="#alerts" data-route="alerts">♧<span>Alerts</span></a>
+    <a href="#rfid" data-route="rfid">⌁<span>RFID</span></a>
+  </nav>
+  <dialog id="modal" class="modal"><div id="modal-content"></div><button class="modal-close" type="button" aria-label="Close dialog" id="close-modal">×</button></dialog>
+  <div id="toast" role="status" class="toast" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.11/dist/hls.min.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>
