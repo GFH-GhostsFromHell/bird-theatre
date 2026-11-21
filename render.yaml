@@ -1,8 +1,13 @@
+# Bird Theatre prototype: one FREE web service, no new PostgreSQL instance.
+# DATABASE_URL is sourced from the EXISTING Electrical Workbench PostgreSQL instance.
+# Bird Theatre creates/uses only the "bird_theatre" PostgreSQL schema, never public.
+# This is logical schema isolation, NOT separate credentials or resource quotas.
 services:
   - type: web
     name: bird-theatre
     runtime: docker
-    plan: starter
+    region: ohio
+    plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
     autoDeploy: true
@@ -11,11 +16,7 @@ services:
         value: '10000'
       - key: DATABASE_URL
         fromDatabase:
-          name: bird-theatre-db
+          name: remote-javafx-portal-db
           property: connectionString
-
-databases:
-  - name: bird-theatre-db
-    plan: basic-256mb
-    region: ohio
-    ipAllowList: []
+      - key: BIRD_DB_SCHEMA
+        value: bird_theatre

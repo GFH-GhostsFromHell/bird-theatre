@@ -32,7 +32,7 @@ These screenshots were captured locally from the project's browser UI using samp
 | Android | Kotlin/Jetpack Compose navigation + shared web portal | Tested signed APK/AAB, native notification service |
 | Windows | JavaFX desktop shell, self-contained MSI build, secure Ed25519-verified updates on app exit | Run Windows MSI CI, configure signing keys, test installed upgrades and native video fallback |
 | iPhone/iPad | SwiftUI/WKWebView shell with XcodeGen project | Apple Developer signing, on-device testing, TestFlight/App Store |
-| Hosting | Dockerized Spring Boot portal, PostgreSQL Render Blueprint | Render deployment, DNS/TLS, DB backups, CDN/streaming infrastructure |
+| Hosting | Free Render web prototype using existing Electrical Workbench PostgreSQL instance; dedicated `bird_theatre` schema | Render approval, SMTP, monitor shared disk capacity, CDN/streaming infrastructure |
 
 ## Architecture
 
@@ -92,7 +92,7 @@ Open `http://localhost:8080`. For **local development only**, the default databa
 
 ### Hosting on Render
 
-The Render Blueprint provisions a **web service and PostgreSQL**. Review service and database pricing before applying it: `render.yaml` deliberately uses paid/stable plan names rather than assuming free persistent Postgres. Render supplies `DATABASE_URL` securely to the web service. You will still need a separate RTSP-to-HLS gateway or video streaming provider to serve live broadcasts. Neither Render deployment nor the media service has been created by this starter archive.
+The prototype Render Blueprint provisions **one free-tier Bird Theatre web service**, using the **existing** `remote-javafx-portal-db` PostgreSQL instance also used by Electrical Workbench. It does not provision another database. Bird Theatre uses a dedicated `bird_theatre` PostgreSQL schema to prevent table collisions; the two apps still share one instance's capacity, credentials and backups. Render supplies `DATABASE_URL` securely to the web service. You will still need a separate RTSP-to-HLS gateway or video streaming provider to serve live broadcasts. Neither Render deployment nor the media service has been created by this starter archive.
 
 Deploy after the repository is in GitHub: Render Dashboard → New → Blueprint → select the Bird Theatre repository → review and approve resources. Configure a real custom domain, TLS, backups, media capacity, logs, and alerting before public launch.
 

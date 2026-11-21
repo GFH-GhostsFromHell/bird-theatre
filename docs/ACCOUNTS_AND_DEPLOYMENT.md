@@ -64,14 +64,29 @@ whether the server has an email sender configured.
 
 ## Host the backend on Render
 
-`render.yaml` declares a Docker web service on the **starter** plan plus a
-PostgreSQL database on the **basic-256mb** plan. These are **paid resources**.
-Creating or approving the Blueprint can incur costs; review before applying.
-The Render Blueprint is a configuration, not evidence that a service is live.
+`render.yaml` now defines a **free-tier prototype web service only**. It references
+the **existing** Electrical Workbench PostgreSQL instance (`remote-javafx-portal-db`)
+in Render's Ohio region, rather than creating another database instance.
+The Bird Theatre application automatically creates its own `bird_theatre` schema,
+sets each JDBC connection's `search_path` to that schema, and refuses to start if
+it cannot verify schema isolation. This prevents accidental use of Electrical
+Workbench's existing `public` tables. There are no new PostgreSQL resources in
+the Blueprint, although free web hosting has usage limits and the existing
+database continues to incur its current bill.
 
-1. In Render, create a new Blueprint from
-   `GFH-GhostsFromHell/bird-theatre` on `main`.
-2. Review and approve the paid web service and PostgreSQL plan.
+**Important:** This is logical isolation, not security or resource isolation:
+both apps share the Postgres login, 1 GB storage allocation, CPU, connections,
+backups, and failure domain. The existing database restricts external access,
+so its current disk usage could not be checked from this session. Monitor disk
+and database connections after deployment. Do not use shared database credentials
+for untrusted workloads; use a separate database user and PostgreSQL database
+or instance when moving into production.
+
+The Render Blueprint is a proposed configuration, not proof that Bird Theatre is live.
+
+1. Open the prepared Bird Theatre Blueprint in **Bryn's workspace** and verify
+   its plan shows **one free-tier web service** and **zero new databases**.
+2. Approve only after reviewing the plan and its expected resource usage.
 3. Allow its first build and the `/actuator/health` health check to pass.
 4. Configure SMTP variables listed above in the web-service environment.
 5. Copy the *actual Render HTTPS service URL* from the Render dashboard.
@@ -83,6 +98,25 @@ The Render Blueprint is a configuration, not evidence that a service is live.
    a test account before inviting the community.
 
 Do not use H2 for the public community; it is an ephemeral development database.
-Render's `DATABASE_URL` should configure persistent PostgreSQL storage.
+Render's `DATABASE_URL` references the existing paid PostgreSQL instance; the
+`BIRD_DB_SCHEMA=bird_theatre` environment variable is a safety boundary.
 Set up backups, rate limiting, sender abuse controls, account auditing,
 monitoring and privacy review before opening signups to the public.
+
+
+### Prototype resource details
+
+- Existing Render database: `remote-javafx-portal-db` (PostgreSQL 18, Ohio,
+  1 GB storage, 256 MB RAM). This database continues serving Electrical Workbench.
+- Bird Theatre database namespace: PostgreSQL schema `bird_theatre` inside the
+  same database. **No tables are created in `public`.**
+- New Bird Theatre web service: Render `free` compute (cold starts, suspension
+  and monthly limits may apply). This is appropriate for development, not a
+  guaranteed 24/7 live streaming community.
+- Connection pool: at most two Bird Theatre database connections, with zero
+  minimum idle connections.
+- First launch creates only the missing `bird_theatre` schema. Hibernate's
+  existing `ddl-auto=update` creates prototype tables inside that schema;
+  production should migrate to Flyway and separate credentials.
+- The Render Blueprint references the existing database via its name. Do not
+  rename or delete `remote-javafx-portal-db` while Bird Theatre uses it.
