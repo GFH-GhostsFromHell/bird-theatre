@@ -40,26 +40,62 @@ The older, no-email `/api/v1/auth/signup` route is **disabled** in regular
 builds to prevent bypassing email verification. It can only be enabled
 explicitly for local test fixtures and should never be enabled on Render.
 
-## Email verification and Mailjet/SMTP
+## Email verification using Electrical Workbench's existing Mailjet account
 
-**Registration and password recovery require server-side SMTP.** Without
-mail delivery, the backend will correctly report these features as
-unavailable; this avoids creating accounts that cannot be verified.
+Electrical Workbench sends verification, password-reset and username-reminder emails
+through Mailjet SMTP. Bird Theatre uses the **same Mailjet provider and account**,
+but sends through its **HTTPS Send API v3.1** (port 443). The different transport
+is necessary because **Render Free blocks outgoing SMTP 25, 465 and 587**.
 
-Configure private environment variables on the Bird Theatre Render service:
+**No new Mailjet subscription is needed.** Both projects can use the same
+Mailjet API key/secret and verified sender, subject to the account's shared
+sending limits. The two apps do not share member accounts, sessions or codes.
 
-| Environment variable | Purpose |
-|---|---|
-| `BIRD_SMTP_HOST` | SMTP host (Mailjet example: `in-v3.mailjet.com`) |
-| `BIRD_SMTP_PORT` | SMTP port (commonly `587`) |
-| `BIRD_SMTP_USERNAME` | SMTP login/API key |
-| `BIRD_SMTP_PASSWORD` | SMTP secret; never commit or publish |
-| `BIRD_MAIL_FROM` | Verified sender email address |
+### Copy existing Mailjet settings securely in Render
 
-Use valid sending-domain verification, SPF and DKIM according to your
-mail provider. Never put real SMTP credentials in GitHub code, Android,
-Windows, or iOS app assets. The `GET /api/v1/auth/options` endpoint indicates
-whether the server has an email sender configured.
+1. Open the existing Electrical Workbench web service at
+   https://dashboard.render.com/web/srv-dbj3eoc9v7es73916h1g,
+   then **Environment**. Locate its Mailjet SMTP credentials. Common Spring
+   names are `SPRING_MAIL_USERNAME` (Mailjet API/public key),
+   `SPRING_MAIL_PASSWORD` (Mailjet secret key) and `MAIL_FROM`
+   (verified sender). **Check the actual names**; do not guess values.
+2. Open the new Bird Theatre web service at
+   https://dashboard.render.com/web/srv-dc0rf7cs728c73b5nm40,
+   then **Environment**. Add these keys with the existing Mailjet values:
+
+   | Bird Theatre environment key | Copy from Electrical Workbench / Mailjet |
+   |---|---|
+   | `BIRD_MAILJET_API_KEY` | Mailjet API/public key (SMTP username) |
+   | `BIRD_MAILJET_SECRET_KEY` | Mailjet secret key (SMTP password) |
+   | `BIRD_MAIL_FROM` | The existing **verified sender email** |
+
+3. Save in Render, not in GitHub, chats, or source files. Render will redeploy.
+   Do not change Electrical Workbench's existing environment variables.
+4. Visit https://bird-theatre-h7xq.onrender.com/api/v1/auth/options and confirm
+   `emailConfigured` is `true`. This indicates the keys are present;
+   it does **not** independently validate them against Mailjet.
+5. Create a disposable Bird Theatre test account with an email address you
+   control. Confirm that Mailjet accepts and delivers the six-digit verification
+   email, then confirm sign-in and password recovery.
+
+**Do not enter secret keys into ChatGPT messages or the public repository.**
+The available Render integration cannot read or copy masked environment secrets
+from Electrical Workbench, so the cross-service credential copying must be
+completed securely within Render's Environment settings. A dedicated Mailjet
+sub-account/API key is preferable when Bird Theatre becomes public.
+
+When credentials are absent, Bird Theatre deliberately reports registration
+and password recovery as unavailable; no unverified account is created. The
+legacy SMTP transport remains optional for local development or paid hosting
+only (`BIRD_SMTP_ENABLED=true` plus `BIRD_SMTP_*`), and it is
+**disabled by default on Render Free**.
+
+Both systems must respect Mailjet sender/domain verification, SPF/DKIM,
+suppression lists and sending quotas. Add per-IP/account email rate limiting,
+verification cleanup and abuse monitoring before inviting public signups.
+Mailjet integration docs:
+https://dev.mailjet.com/docs/email-api/send-api-v31/send-basic-email
+
 
 ## Host the backend on Render
 
@@ -87,7 +123,7 @@ The Render Blueprint is a proposed configuration, not proof that Bird Theatre is
    its plan shows **one free-tier web service** and **zero new databases**.
 2. Approve only after reviewing the plan and its expected resource usage.
 3. Allow its first build and the `/actuator/health` health check to pass.
-4. Configure SMTP variables listed above in the web-service environment.
+4. Securely configure the three Mailjet HTTPS API variables listed above in the Bird Theatre service Environment settings.
 5. Copy the *actual Render HTTPS service URL* from the Render dashboard.
 6. Open Bird Theatre Desktop → **Server settings** and paste that URL.
    Do the same in the mobile client configuration before creating production

@@ -2,7 +2,7 @@
 
 **Every visitor has a story.** A community where people share live views of bird feeders and nesting boxes, learn which species visit, monitor estimated arrivals and departures, and optionally identify previously tagged birds with RFID.
 
-> **Early-stage project, not a deployed service.** Independent of [Electrical Workbench](https://github.com/GFH-GhostsFromHell/electrical-workbench). Initial GitHub CI passed for the Spring Boot portal, Windows MSI, iOS simulator, and vision-event tests on November 21, 2026; Android build validation is in progress. A production wildlife AI model installation, live camera gateway, physical RFID readers, mobile push service, and App Store distribution are not included.
+> **Early-stage project, live prototype at [Bird Theatre](https://bird-theatre-h7xq.onrender.com).** Independent of [Electrical Workbench](https://github.com/GFH-GhostsFromHell/electrical-workbench). Initial GitHub CI passed for the Spring Boot portal, Windows MSI, iOS simulator, and vision-event tests on November 21, 2026; Android build validation is in progress. A production wildlife AI model installation, live camera gateway, physical RFID readers, mobile push service, and App Store distribution are not included.
 
 ## Source, builds and installers
 
@@ -22,7 +22,7 @@ These screenshots were captured locally from the project's browser UI using samp
 
 | Area | Current starter | Required for a complete release |
 |---|---|---|
-| Community & accounts | Email-verified registration, sign-in, password/username recovery, editable private/public member profiles, personal camera records | Configure SMTP; add production rate limits, anti-abuse monitoring, moderation and reporting |
+| Community & accounts | Email-verified registration, sign-in, password/username recovery, editable private/public member profiles, personal camera records | Configure existing Mailjet credentials for HTTPS Send API; add anti-abuse monitoring, moderation and reporting |
 | Live video | Browser HLS player for authorized HTTPS `.m3u8` URLs | Real HLS hosting/CDN or MediaMTX gateway and streaming credentials |
 | Species recognition | **Pretrained Torchvision detector + BioCLIP 2 species recognition edge agent**, legacy ONNX reference; authenticated event API | Install model dependencies/download weights, verify camera hardware and species taxonomy, field calibration |
 | Sighting history | Approximate multi-bird tracks with unique event IDs, offline queue, arrival/departure events and 30-day species counts | Real-world tracking validation, uncertainty review, correction/export |
@@ -32,7 +32,7 @@ These screenshots were captured locally from the project's browser UI using samp
 | Android | Kotlin/Jetpack Compose navigation + shared web portal | Tested signed APK/AAB, native notification service |
 | Windows | JavaFX desktop shell, self-contained MSI build, secure Ed25519-verified updates on app exit | Run Windows MSI CI, configure signing keys, test installed upgrades and native video fallback |
 | iPhone/iPad | SwiftUI/WKWebView shell with XcodeGen project | Apple Developer signing, on-device testing, TestFlight/App Store |
-| Hosting | Free Render web prototype using existing Electrical Workbench PostgreSQL instance; dedicated `bird_theatre` schema | Render approval, SMTP, monitor shared disk capacity, CDN/streaming infrastructure |
+| Hosting | Live free Render web prototype using existing Electrical Workbench PostgreSQL instance; dedicated `bird_theatre` schema | Set Mailjet API secrets, monitor shared disk capacity, CDN/streaming infrastructure |
 
 ## Architecture
 
@@ -78,7 +78,7 @@ Bird Theatre uses a standalone account database with a shared profile across its
 
 The Windows client's initial HTTP 404 occurred because the **planned** Bird Theatre Render address was not serving a deployed portal. The updated Windows app opens the account screen and provides **Server settings** for configuring the actual live HTTPS portal URL. See [Account and deployment setup](docs/ACCOUNTS_AND_DEPLOYMENT.md).
 
-**Email verification and recovery need SMTP configured on Render**; until then, registration correctly reports that email delivery isn't set up. Do not put SMTP passwords in source code. The [deployment guide](docs/ACCOUNTS_AND_DEPLOYMENT.md) documents all required environment variables.
+**Email verification and recovery need the existing Mailjet credentials configured for HTTPS API on Render**; until then, registration correctly reports that email delivery isn't set up. Do not put SMTP passwords in source code. The [deployment guide](docs/ACCOUNTS_AND_DEPLOYMENT.md) documents all required environment variables.
 
 ## Local web development
 
