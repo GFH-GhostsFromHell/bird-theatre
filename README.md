@@ -6,9 +6,9 @@
 
 ## Source, builds and installers
 
-[**GitHub repository**](https://github.com/GFH-GhostsFromHell/bird-theatre) · [**Windows MSI workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-desktop.yml) · [**Android APK workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-android.yml) · [**iOS simulator workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-ios.yml) · [**Web tests**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-web.yml)
+[**GitHub repository**](https://github.com/GFH-GhostsFromHell/bird-theatre) · [**Download Windows Installer (.msi, direct)**](https://github.com/GFH-GhostsFromHell/bird-theatre/releases/latest/download/BirdTheatre-Windows-Setup.msi) · [**Windows MSI build workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-desktop.yml) · [**Android APK workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-android.yml) · [**iOS simulator workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-ios.yml) · [**Web tests**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-web.yml)
 
-Download the MSI or APK from a **successful GitHub Actions run** under **Artifacts**. CI Windows MSI builds may be unsigned; only signed update manifests published as a release can enable automatic unattended updates. iOS simulator builds are **not signed iPhone apps**. See [Windows installer and automatic updates](docs/WINDOWS_INSTALLER_AND_UPDATES.md).
+**Windows:** Download the [Bird Theatre Windows Installer directly as an `.msi`](https://github.com/GFH-GhostsFromHell/bird-theatre/releases/latest/download/BirdTheatre-Windows-Setup.msi). **Do not use the Actions/Artifacts ZIP**; Windows installers are now published as direct GitHub Release assets after the MSI and runtime checks pass. Android APKs remain in GitHub Actions artifacts. Developer MSI builds may not be Authenticode-signed, and manual-download releases do **not** enable unattended updates without signed manifests. iOS simulator builds are **not signed iPhone apps**. See [Windows installer and automatic updates](docs/WINDOWS_INSTALLER_AND_UPDATES.md).
 
 ## Interface preview
 
@@ -68,7 +68,7 @@ The backend **does not proxy livestream video or hold your raw video**. Owners p
 
 The Windows JavaFX client now has a **self-contained, per-user MSI installer** with a permanent upgrade identity. It checks for new releases **on startup and every four hours**, downloads a **cryptographically verified** MSI in the background, and automatically installs it when Bird Theatre closes (or using **Install update now**). The installer restarts Bird Theatre after a successful upgrade.
 
-**Secure publishing is opt-in:** GitHub Actions builds a downloadable MSI artifact with no signing setup, but unattended installation is **disabled** until repository release-signing keys are configured. This protects users against modified download metadata or unverified installers. The template's MSI is not Authenticode-signed; Windows may display publisher warnings until a code-signing certificate is configured. GitHub releases must be public for the embedded unauthenticated feed.
+**Secure publishing is opt-in:** GitHub Actions publishes the MSI as a direct GitHub Release download even without signing setup; unattended installation is **disabled** until repository release-signing keys are configured. This protects users against modified download metadata or unverified installers. The template's MSI is not Authenticode-signed; Windows may display publisher warnings until a code-signing certificate is configured. GitHub releases must be public for the embedded unauthenticated feed.
 
 **Build/run/publisher-key setup:** [Windows Installer and Automatic Updates](docs/WINDOWS_INSTALLER_AND_UPDATES.md).
 

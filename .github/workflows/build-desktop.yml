@@ -110,14 +110,6 @@ jobs:
             throw 'Bundled launcher could not load its JavaFX and HTTP runtime components'
           }
 
-      - name: Upload MSI installer from each successful build
-        uses: actions/upload-artifact@v4
-        with:
-          name: BirdTheatre-Windows-Setup
-          path: desktop-client/target/installer/BirdTheatre-Windows-Setup.msi
-          retention-days: 30
-          if-no-files-found: error
-
       - name: Check if signed publishing is configured
         id: signing
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -158,10 +150,36 @@ jobs:
             --latest
           if ($LASTEXITCODE -ne 0) { throw 'Release publishing failed' }
 
-      - name: Explain unsigned/nonpublished builds
-        if: steps.signing.outputs.enabled == 'false'
+      - name: Publish direct MSI download (manual installation only when release signing is unavailable)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && steps.signing.outputs.enabled == 'false'
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          Write-Host 'MSI artifact produced, but no automatic-update release published.'
-          Write-Host 'Configure repo variable UPDATE_SIGNING_PUBLIC_KEY_BASE64 and secret UPDATE_SIGNING_PRIVATE_KEY_BASE64 as documented.'
-          Write-Host 'Never auto-install a package lacking an authenticated publisher manifest.'
+          $ErrorActionPreference = 'Stop'
+          $tag = "windows-v$env:APP_VERSION"
+          $msi = 'target/installer/BirdTheatre-Windows-Setup.msi'
+          if (-not (Test-Path -LiteralPath $msi)) { throw 'Windows MSI is missing' }
+          # GitHub Actions artifacts always download as ZIPs; releases serve the actual .msi directly.
+          # This manual-install release deliberately includes NO signed update manifest, so the
+          # application cannot authorize automatic installation without configured publisher keys.
+          gh release create $tag $msi `
+            --repo "${{ github.repository }}" `
+            --title "Bird Theatre Windows $env:APP_VERSION" `
+            --notes "Direct Bird Theatre Windows .msi download; no ZIP extraction. Development release for manual installation. No signed auto-update manifest is published, and unattended updates remain disabled until release signing is configured. The MSI is not Authenticode-signed, so Windows may warn about an unknown publisher." `
+            --latest
+          if ($LASTEXITCODE -ne 0) { throw 'Direct MSI release publishing failed' }
+
+      - name: Verify public direct MSI release asset
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = "windows-v$env:APP_VERSION"
+          $assets = gh release view $tag --repo "${{ github.repository }}" --json assets --jq '.assets[].name'
+          if ($LASTEXITCODE -ne 0 -or $assets -notcontains 'BirdTheatre-Windows-Setup.msi') {
+            throw 'Published release is missing the direct MSI asset'
+          }
+          Write-Host "Direct installer: https://github.com/${{ github.repository }}/releases/latest/download/BirdTheatre-Windows-Setup.msi"

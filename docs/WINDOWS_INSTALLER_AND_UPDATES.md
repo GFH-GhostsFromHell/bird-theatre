@@ -16,6 +16,12 @@ This is the Bird Theatre **desktop** installer/update channel. It is independent
 
 **Important:** Automatic installation is enabled only for installed Windows releases containing a trusted Ed25519 release-verification public key. CI artifacts without the signing configuration do not auto-install updates. The MSI itself is *not* Authenticode-signed by this template and may prompt Windows SmartScreen on first install; use a Windows code-signing certificate in production.
 
+## Direct download (not ZIP)
+
+[**Download the latest Bird Theatre Windows installer — direct .msi**](https://github.com/GFH-GhostsFromHell/bird-theatre/releases/latest/download/BirdTheatre-Windows-Setup.msi)
+
+GitHub Actions **Artifacts** are automatically ZIP-compressed by GitHub. This project publishes Windows installers instead as public **GitHub Release assets** from successful main-branch builds. Download the MSI directly from Releases; do not use a workflow artifact ZIP. Unsigned/manual installer releases do not contain `BirdTheatre-update.json` or its signature and cannot enable unattended updates. Configuring the signing secret and public key allows verified automatic updates in subsequent releases. Windows may show a publisher warning because the MSI is not Authenticode-signed.
+
 ## Build the MSI locally on Windows
 
 1. Install **JDK 21** (with `jpackage`), Maven 3.9+, and a Windows `jpackage`-compatible **WiX Toolset**. Verify `java`, `mvn`, and `jpackage` resolve on PATH.
@@ -31,7 +37,7 @@ Use a higher three-part numeric version for every upgrade. Do not change the `--
 ## Build and publish in GitHub Actions
 
 1. Create `GFH-GhostsFromHell/bird-theatre` and push this repository. The default auto-update URL refers to **public** releases under that exact repository; a private repository will not work for unauthenticated Windows clients.
-2. Run Actions → **Build, test and release Bird Theatre Windows MSI** → **Run workflow**. Once the workflow succeeds, its **BirdTheatre-Windows-Setup** artifact contains the MSI; by itself, this does not enable secure auto-updates.
+2. Run Actions → **Build, test and release Bird Theatre Windows MSI** → **Run workflow**. Once the workflow succeeds, it publishes the installer **directly** to [GitHub Releases](https://github.com/GFH-GhostsFromHell/bird-theatre/releases/latest/download/BirdTheatre-Windows-Setup.msi) as `BirdTheatre-Windows-Setup.msi`. **No ZIP extraction is required.** With no signing keys, the release is for manual installation only; no automatic-update manifest is published.
 3. Generate a fresh **Ed25519** update-signing keypair **locally** on a trusted computer with Java 21:
 
    ```powershell
@@ -42,7 +48,7 @@ Use a higher three-part numeric version for every upgrade. Do not change the `--
 4. In the *Bird Theatre* GitHub repository Settings → Secrets and variables → Actions, configure:
    - Repository **secret** `UPDATE_SIGNING_PRIVATE_KEY_BASE64` = the generated **private** key value.
    - Repository **variable** `UPDATE_SIGNING_PUBLIC_KEY_BASE64` = the generated **public** key value.
-5. Re-run the Windows workflow or push a change to `desktop-client/`. Successful `main` builds publish the `windows-v<version>` GitHub Release containing `BirdTheatre-Windows-Setup.msi`, `BirdTheatre-update.json`, and `BirdTheatre-update.json.sig`.
+5. Re-run the Windows workflow or push a change to `desktop-client/`. Successful `main` builds **always** publish a direct `.msi` release. When the signing credentials are configured, that same release also contains `BirdTheatre-update.json` and `BirdTheatre-update.json.sig` to enable verified automatic updates.
 6. Install one of the newly signed-metadata-enabled builds on a Windows PC. Later published versions will be discovered and staged automatically.
 
 GitHub Actions will refuse to publish an update when the private key does not match the embedded public key. The published manifest and MSI are delivered over HTTPS, the manifest must verify with the application’s pinned Ed25519 key, and the MSI's SHA-256 must match the signed manifest exactly. Only the versioned MSI asset at `GFH-GhostsFromHell/bird-theatre` is accepted.
