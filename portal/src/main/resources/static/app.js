@@ -162,6 +162,18 @@ function openAuth(mode='login'){
     root.append(btn('Forgot password?',()=>openAuth('recover'),'text-button'));
   }
   root.append(form);openDialog(root);
+  // Show an actionable reason before someone attempts to register without Mailjet.
+  if(['signup','recover','username'].includes(mode)){
+    api('/auth/options').then(options=>{
+      if(options.emailConfigured || !modalBody.contains(root))return;
+      const info=node('p','notice warning',
+        'Email verification is being configured. Registration and password recovery '+
+        'will be available once the Bird Theatre Mailjet connection is enabled.');
+      root.insertBefore(info,form);
+      const submit=form.querySelector('button[type="submit"]');
+      if(submit)submit.disabled=true;
+    }).catch(()=>{/* Account API errors are handled on submission. */});
+  }
 }
 
 async function memberProfile(){
