@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="390" viewBox="0 0 1200 390" role="img" aria-label="Bird Theatre circular feeder forward camera sector study">
+<defs>
+ <linearGradient id="wood" x1="0" y1="0" x2="1" y2=".15"><stop stop-color="#b98549"/><stop offset=".25" stop-color="#edc48c"/><stop offset=".65" stop-color="#dfae70"/><stop offset="1" stop-color="#b87c3b"/></linearGradient>
+ <linearGradient id="woodLight" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#efca94"/><stop offset=".55" stop-color="#f7ddac"/><stop offset="1" stop-color="#dba86b"/></linearGradient>
+ <linearGradient id="shell" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#525b54"/><stop offset=".46" stop-color="#252e2a"/><stop offset="1" stop-color="#131e1c"/></linearGradient>
+ <linearGradient id="solar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#46698a"/><stop offset=".45" stop-color="#1c3859"/><stop offset="1" stop-color="#0d2139"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b8d7d0" stop-opacity=".55"/><stop offset=".38" stop-color="#e0f3e9" stop-opacity=".12"/><stop offset=".8" stop-color="#dbe9dd" stop-opacity=".33"/><stop offset="1" stop-color="#c5d7d8" stop-opacity=".62"/></linearGradient>
+ <radialGradient id="lens"><stop stop-color="#19284e"/><stop offset=".22" stop-color="#4788b5"/><stop offset=".45" stop-color="#0c1626"/><stop offset=".8" stop-color="#111718"/><stop offset="1" stop-color="#424b48"/></radialGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity=".19"/></filter>
+ <pattern id="solarGrid" patternUnits="userSpaceOnUse" width="23" height="20"><path d="M0 0H23V20H0Z" fill="none" stroke="#9db4c7" stroke-opacity=".65" stroke-width="1"/></pattern>
+ <pattern id="grain" patternUnits="userSpaceOnUse" width="32" height="35"><path d="M5 0C0 14 12 23 4 35M22 0C16 15 27 20 22 35" stroke="#8c663f" stroke-opacity=".15" stroke-width="1.4" fill="none"/></pattern>
+</defs><rect width="1200" height="390" fill="#f3f7f3"/><rect width="1200" height="70" fill="#153c32"/>
+<text x="30" y="44" fill="#fff" font-size="25" font-weight="700" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif">Bird Theatre | Circular seed feeder — camera and feeding zone</text>
+<path d="M87 166L144 118H352L404 166Z" fill="url(#solar)" stroke="#314439" stroke-width="16"/>
+<rect x="148" y="174" width="196" height="151" rx="11" fill="url(#glass)" stroke="#91b0a6" stroke-width="2"/>
+<rect x="160" y="267" width="172" height="47" fill="#a78c55" opacity=".72"/>
+<ellipse cx="250" cy="323" rx="168" ry="30" fill="url(#wood)" stroke="#8e6a43" stroke-width="3"/>
+<rect x="310" y="177" width="47" height="66" rx="13" fill="url(#shell)" stroke="#4b5551" stroke-width="2"/><circle cx="333.5" cy="208.02" r="15" fill="#161d1e" stroke="#65716d" stroke-width="2"/><circle cx="333.5" cy="208.02" r="12" fill="url(#lens)"/><circle cx="330.5" cy="204.02" r="2.88" fill="#90d8f1" opacity=".7"/><circle cx="333.5" cy="234" r="2.5" fill="#59c09c"/>
+<path d="M332 232L228 323L395 328Z" fill="#67c69b" opacity=".28" stroke="#39a47c" stroke-width="2"/>
+<text x="492" y="145" fill="#214738" font-size="23" font-weight="700" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif">Shared BT-CAM platform</text>
+<text x="492" y="181" fill="#37594b" font-size="18" font-weight="500" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif">Lens faces the front feeding sector, not through the hopper</text>
+<text x="492" y="217" fill="#37594b" font-size="18" font-weight="500" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif">Avoid promising clear 360° coverage from one fixed camera.</text>
+<text x="492" y="253" fill="#456e5b" font-size="17" font-weight="500" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif">Prototype: adjust lens pitch; check feeding left, centre and right.</text>
+<text x="492" y="288" fill="#456e5b" font-size="17" font-weight="500" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif">Removable washable tray, drainage and sealed camera mount.</text>
+<rect x="490" y="309" width="630" height="46" rx="12" fill="#dfeee6"/>
+<text x="805" y="340" fill="#235443" font-size="17" font-weight="600" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif">Solar assist: verify average camera load in real weather</text>
+</svg>
