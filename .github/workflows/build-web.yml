@@ -18,6 +18,8 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+      - name: Validate browser app JavaScript syntax
+        run: node --check portal/src/main/resources/static/app.js
       - name: Run API tests and package portal
         run: mvn -B -f portal/pom.xml clean verify
       - uses: actions/upload-artifact@v4
