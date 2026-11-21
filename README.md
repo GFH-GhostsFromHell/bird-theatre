@@ -2,7 +2,13 @@
 
 **Every visitor has a story.** A community where people share live views of bird feeders and nesting boxes, learn which species visit, monitor estimated arrivals and departures, and optionally identify previously tagged birds with RFID.
 
-> **Early-stage starter, not a deployed service.** This project is a new, independent sibling to [Electrical Workbench](https://github.com/GFH-GhostsFromHell/electrical-workbench). The website, API, cross-platform client shells, sample edge agents, and GitHub Actions are source-code foundations. The Android/Windows/iOS builds have **not** yet passed remote CI and no real wildlife AI model, camera streaming server, physical RFID hardware, push service, or App Store distribution is included.
+> **Early-stage project, not a deployed service.** Independent of [Electrical Workbench](https://github.com/GFH-GhostsFromHell/electrical-workbench). Initial GitHub CI passed for the Spring Boot portal, Windows MSI, iOS simulator, and vision-event tests on November 21, 2026; Android build validation is in progress. A production wildlife AI model installation, live camera gateway, physical RFID readers, mobile push service, and App Store distribution are not included.
+
+## Source, builds and installers
+
+[**GitHub repository**](https://github.com/GFH-GhostsFromHell/bird-theatre) · [**Windows MSI workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-desktop.yml) · [**Android APK workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-android.yml) · [**iOS simulator workflow**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-ios.yml) · [**Web tests**](https://github.com/GFH-GhostsFromHell/bird-theatre/actions/workflows/build-web.yml)
+
+Download the MSI or APK from a **successful GitHub Actions run** under **Artifacts**. CI Windows MSI builds may be unsigned; only signed update manifests published as a release can enable automatic unattended updates. iOS simulator builds are **not signed iPhone apps**. See [Windows installer and automatic updates](docs/WINDOWS_INSTALLER_AND_UPDATES.md).
 
 ## Interface preview
 
