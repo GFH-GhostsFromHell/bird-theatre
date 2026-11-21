@@ -99,8 +99,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Packaged app-image build failed' }
           $exe = 'target/smoke/BirdTheatre/BirdTheatre.exe'
           if (-not (Test-Path $exe)) { throw 'Bundled Windows launcher was not generated' }
-          & $exe '--package-self-test'
-          if ($LASTEXITCODE -ne 0) { throw "Packaged JavaFX self-test failed: $LASTEXITCODE" }
+          # GUI-subsystem EXEs can return to PowerShell before their JVM has started.
+          $resolved = (Resolve-Path $exe).Path
+          $process = Start-Process -FilePath $resolved -ArgumentList '--package-self-test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Packaged JavaFX self-test failed: $($process.ExitCode)" }
+          Start-Sleep -Milliseconds 500
           $log = Join-Path $env:LOCALAPPDATA 'BirdTheatre/desktop-startup.log'
           if (-not (Test-Path $log)) { throw 'Packaged launcher failed to create startup diagnostics' }
           if ((Get-Content -LiteralPath $log -Raw) -notmatch 'Packaged runtime self-test passed') {
