@@ -20,7 +20,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      # GitHub Ubuntu runners already include the Android command-line SDK.
+      # Avoid setup-android's obsolete 'sdkmanager tools' installation step.
       - name: Install Android SDK API 36
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@v4
