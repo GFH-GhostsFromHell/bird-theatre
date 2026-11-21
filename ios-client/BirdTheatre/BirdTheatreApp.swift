@@ -9,7 +9,7 @@ struct BirdTheatreApp: App {
 }
 
 private enum Theatre {
-    static let origin = URL(string: "https://bird-theatre.onrender.com")!
+    static let origin = URL(string: "https://bird-theatre-h7xq.onrender.com")!
 }
 
 @MainActor

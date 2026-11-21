@@ -19,7 +19,7 @@ import javafx.scene.control.ButtonType;
 import java.util.prefs.Preferences;
 
 public class BirdTheatreDesktop extends Application {
-    private static final String DEFAULT_PORTAL = "https://bird-theatre.onrender.com";
+    private static final String DEFAULT_PORTAL = "https://bird-theatre-h7xq.onrender.com";
     private final Preferences settings = Preferences.userNodeForPackage(BirdTheatreDesktop.class);
     private String origin = System.getProperty("birdtheatre.url",
         settings.get("birdtheatre.portal.url", DEFAULT_PORTAL));

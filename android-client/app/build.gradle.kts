@@ -2,7 +2,7 @@ plugins {
   id("com.android.application")
   id("org.jetbrains.kotlin.plugin.compose")
 }
-val portalUrl = providers.gradleProperty("portalUrl").orElse("https://bird-theatre.onrender.com")
+val portalUrl = providers.gradleProperty("portalUrl").orElse("https://bird-theatre-h7xq.onrender.com")
 android {
   namespace = "ca.gfh.birdtheatre"
   compileSdk = 36

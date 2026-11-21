@@ -94,7 +94,7 @@ Open `http://localhost:8080`. For **local development only**, the default databa
 
 The prototype Render Blueprint provisions **one free-tier Bird Theatre web service**, using the **existing** `remote-javafx-portal-db` PostgreSQL instance also used by Electrical Workbench. It does not provision another database. Bird Theatre uses a dedicated `bird_theatre` PostgreSQL schema to prevent table collisions; the two apps still share one instance's capacity, credentials and backups. Render supplies `DATABASE_URL` securely to the web service. You will still need a separate RTSP-to-HLS gateway or video streaming provider to serve live broadcasts. Neither Render deployment nor the media service has been created by this starter archive.
 
-Deploy after the repository is in GitHub: Render Dashboard → New → Blueprint → select the Bird Theatre repository → review and approve resources. Configure a real custom domain, TLS, backups, media capacity, logs, and alerting before public launch.
+Prototype deployed through Render Blueprint to `https://bird-theatre-h7xq.onrender.com`, using the existing shared PostgreSQL instance and isolated `bird_theatre` schema. The web app is on a free-tier service, not suitable for uninterrupted production streaming. For future infrastructure changes: Render Dashboard → Bird Theatre Blueprint. Configure a real custom domain, TLS, backups, media capacity, logs, and alerting before public launch.
 
 ## Connect a camera
 
@@ -161,7 +161,7 @@ Each platform is its own GitHub Actions workflow on `main` (and manual dispatch)
 - `BirdTheatre-iOS-Simulator` — Simulator-only app, **not** a signed iPhone IPA.
 - `BirdTheatre-Web-jar` — tested backend JAR.
 
-Default client URL: `https://bird-theatre.onrender.com`. This address is **a planned deployment target, not a verified active site**. For Android build overrides use Gradle property `-PportalUrl=https://your-portal.example`; for desktop launch use `-Dbirdtheatre.url=https://your-portal.example`. Change the Swift `Theatre.origin` constant when choosing a real iOS backend URL.
+Default client URL: `https://bird-theatre-h7xq.onrender.com`. This is the live Render Free prototype address, verified by the initial deployment and HTTP 200 homepage check on November 21, 2026. For Android build overrides use Gradle property `-PportalUrl=https://your-portal.example`; for desktop launch use `-Dbirdtheatre.url=https://your-portal.example`. Change the Swift `Theatre.origin` constant when choosing a real iOS backend URL.
 
 ## Safety and data accuracy
 

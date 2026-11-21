@@ -2,9 +2,8 @@
 
 ## Why Windows showed Server returned 404
 
-The desktop program was built before its server was deployed. The default
-`https://bird-theatre.onrender.com` is a **planned address**, not a promise
-that Render has an active web service there.
+The first desktop build pointed to an unprovisioned URL. The Bird Theatre prototype is now deployed at
+`https://bird-theatre-h7xq.onrender.com` and its initial Render deployment completed successfully. Rebuilds from this commit use the live address.
 
 The desktop application now has **Server settings**, so you can paste the
 actual HTTPS URL assigned by Render once the portal is deployed. This setting
