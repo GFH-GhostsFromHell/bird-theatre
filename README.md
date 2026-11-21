@@ -22,13 +22,13 @@ These screenshots were captured locally from the project's browser UI using samp
 
 | Area | Current starter | Required for a complete release |
 |---|---|---|
-| Community & accounts | Signup/login, personal camera records, public and private listings | Moderation, reporting, account recovery, profile settings |
+| Community & accounts | Email-verified registration, sign-in, password/username recovery, editable private/public member profiles, personal camera records | Configure SMTP; add production rate limits, anti-abuse monitoring, moderation and reporting |
 | Live video | Browser HLS player for authorized HTTPS `.m3u8` URLs | Real HLS hosting/CDN or MediaMTX gateway and streaming credentials |
 | Species recognition | **Pretrained Torchvision detector + BioCLIP 2 species recognition edge agent**, legacy ONNX reference; authenticated event API | Install model dependencies/download weights, verify camera hardware and species taxonomy, field calibration |
 | Sighting history | Approximate multi-bird tracks with unique event IDs, offline queue, arrival/departure events and 30-day species counts | Real-world tracking validation, uncertainty review, correction/export |
 | Alerts | Member rules on owned or public cameras, cooldown, alert inbox, tab-open browser notifications | Mobile push (FCM/APNs), email, offline delivery, per-member subscriptions |
 | RFID | Register known tags, serial gateway example, owner-only RFID visit timeline | Compatible reader and authorized pre-existing tags, hardware integration |
-| Web | Responsive public camera gallery and member tools | Accessibility, localization, moderation, full security hardening |
+| Web | Responsive camera gallery, sign-in/register/recovery screens, member profile settings and tools | Accessibility, localization, moderation, full security hardening |
 | Android | Kotlin/Jetpack Compose navigation + shared web portal | Tested signed APK/AAB, native notification service |
 | Windows | JavaFX desktop shell, self-contained MSI build, secure Ed25519-verified updates on app exit | Run Windows MSI CI, configure signing keys, test installed upgrades and native video fallback |
 | iPhone/iPad | SwiftUI/WKWebView shell with XcodeGen project | Apple Developer signing, on-device testing, TestFlight/App Store |
@@ -71,6 +71,14 @@ The Windows JavaFX client now has a **self-contained, per-user MSI installer** w
 **Secure publishing is opt-in:** GitHub Actions publishes the MSI as a direct GitHub Release download even without signing setup; unattended installation is **disabled** until repository release-signing keys are configured. This protects users against modified download metadata or unverified installers. The template's MSI is not Authenticode-signed; Windows may display publisher warnings until a code-signing certificate is configured. GitHub releases must be public for the embedded unauthenticated feed.
 
 **Build/run/publisher-key setup:** [Windows Installer and Automatic Updates](docs/WINDOWS_INSTALLER_AND_UPDATES.md).
+
+## Account registration, profiles and the 404 server error
+
+Bird Theatre uses a standalone account database with a shared profile across its web, Windows, Android and iOS clients. Account features now include login, verified email registration, username/password recovery, editable profile details, profile privacy settings and password changes that revoke previous sessions. This is similar to Electrical Workbench's experience; the two apps do **not** automatically share account credentials.
+
+The Windows client's initial HTTP 404 occurred because the **planned** Bird Theatre Render address was not serving a deployed portal. The updated Windows app opens the account screen and provides **Server settings** for configuring the actual live HTTPS portal URL. See [Account and deployment setup](docs/ACCOUNTS_AND_DEPLOYMENT.md).
+
+**Email verification and recovery need SMTP configured on Render**; until then, registration correctly reports that email delivery isn't set up. Do not put SMTP passwords in source code. The [deployment guide](docs/ACCOUNTS_AND_DEPLOYMENT.md) documents all required environment variables.
 
 ## Local web development
 
