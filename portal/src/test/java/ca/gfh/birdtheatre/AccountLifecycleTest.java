@@ -30,7 +30,7 @@ class AccountLifecycleTest {
     @Autowired ObjectMapper json;
     @MockitoBean JavaMailSender sender;
 
-    private JsonNode post(String path, Object payload, int expectedStatus) throws Exception {
+    private JsonNode postJson(String path, Object payload, int expectedStatus) throws Exception {
         String body=json.writeValueAsString(payload);
         String response=mvc.perform(post(path)
             .contentType(MediaType.APPLICATION_JSON).content(body))
@@ -56,13 +56,13 @@ class AccountLifecycleTest {
             .content(json.writeValueAsBytes(Map.of(
                 "handle",handle,"displayName","Unsafe", "password","bad-password-1234"))))
             .andExpect(status().isGone());
-        JsonNode registration=post("/api/v1/auth/register/start",
+        JsonNode registration=postJson("/api/v1/auth/register/start",
             Map.of("handle",handle,"email",address,"displayName","Bird Keeper",
                 "password","original-password-123"),200);
         assertTrue(registration.get("verificationRequired").asBoolean());
         String code=captureCode(1);
-        post("/api/v1/auth/register/verify",Map.of("handle",handle,"code","000000".equals(code)?"111111":"000000"),400);
-        JsonNode account=post("/api/v1/auth/register/verify",Map.of("handle",handle,"code",code),200);
+        postJson("/api/v1/auth/register/verify",Map.of("handle",handle,"code","000000".equals(code)?"111111":"000000"),400);
+        JsonNode account=postJson("/api/v1/auth/register/verify",Map.of("handle",handle,"code",code),200);
         String bearer="Bearer "+account.get("token").asText();
         mvc.perform(get("/api/v1/me/profile").header("Authorization",bearer))
             .andExpect(status().isOk())
@@ -94,13 +94,13 @@ class AccountLifecycleTest {
         mvc.perform(get("/api/v1/me/profile").header("Authorization",updatedBearer))
             .andExpect(status().isOk());
 
-        post("/api/v1/auth/recovery/start",Map.of("account",address),200);
+        postJson("/api/v1/auth/recovery/start",Map.of("account",address),200);
         String resetCode=captureCode(2);
-        post("/api/v1/auth/recovery/complete",Map.of(
+        postJson("/api/v1/auth/recovery/complete",Map.of(
             "handle",handle,"code",resetCode,"newPassword","reset-password-123"),200);
         mvc.perform(get("/api/v1/me/profile").header("Authorization",updatedBearer))
             .andExpect(status().isUnauthorized());
-        JsonNode signedIn=post("/api/v1/auth/login",Map.of(
+        JsonNode signedIn=postJson("/api/v1/auth/login",Map.of(
             "handle",handle,"password","reset-password-123"),200);
         assertNotNull(signedIn.get("token").asText());
         mvc.perform(get("/api/v1/me/profile")
