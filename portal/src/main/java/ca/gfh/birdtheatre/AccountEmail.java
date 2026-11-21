@@ -15,7 +15,7 @@ class AccountEmail {
     private final String from;
 
     AccountEmail(ObjectProvider<JavaMailSender> sender,
-        @Value("\${bird.mail.from:}") String from) {
+        @Value("${bird.mail.from:}") String from) {
         this.sender=sender;
         this.from=from==null ? "" : from.trim();
     }
