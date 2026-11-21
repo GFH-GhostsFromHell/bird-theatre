@@ -1,0 +1,44 @@
+name: Verify Live Bird Theatre Mailjet Configuration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'render.yaml'
+      - '.github/workflows/verify-mailjet-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-mailjet-configuration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Verify deployed account API has Mailjet configured
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://bird-theatre-h7xq.onrender.com/api/v1/auth/options'
+          echo 'Checking public authentication capabilities (never requesting or printing secret values).'
+          for attempt in $(seq 1 28); do
+            response="$(curl --fail --silent --show-error --connect-timeout 10 --max-time 25 "$url" || true)"
+            if [ -n "$response" ] && printf '%s' "$response" | python3 -c '
+          import json,sys
+          try:
+              options=json.load(sys.stdin)
+              assert options.get("emailConfigured") is True
+              assert options.get("passwordRecoveryAvailable") is True
+          except (ValueError,AssertionError):
+              sys.exit(1)
+          ' ; then
+              echo 'Mailjet configuration is available to Bird Theatre account services.'
+              echo 'This does not verify delivery: do a real verification-code test in Mailjet.'
+              exit 0
+            fi
+            echo "Attempt $attempt: Render is starting or Mailjet settings are not yet available."
+            sleep 12
+          done
+          echo 'Bird Theatre did not report configured email delivery within the health-check window.'
+          exit 1
