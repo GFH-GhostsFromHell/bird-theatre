@@ -34,6 +34,12 @@ These screenshots were captured locally from the project's browser UI using samp
 | iPhone/iPad | SwiftUI/WKWebView shell with XcodeGen project | Apple Developer signing, on-device testing, TestFlight/App Store |
 | Hosting | Live free Render web prototype using existing Electrical Workbench PostgreSQL instance; dedicated `bird_theatre` schema | Set Mailjet API secrets, monitor shared disk capacity, CDN/streaming infrastructure |
 
+## Hardware prototype proposal
+
+The [**Bird Theatre Original Series hardware and universal BT-CAM prototype proposal (Revision G)**](docs/PROTOTYPE_PROPOSAL.md) consolidates the original birdhouse, circular feeder, nesting box, owl house, and observation post designs. It documents a removable observation-only straight-out birdhouse perch, practical optical sightlines, common BT-CAM electronics and lens variants, solar/battery power, camera alternatives, field validation, wildlife safety, integration boundaries, and manufacturer RFQ requirements.
+
+**Engineering status:** concept and prototype requirements only—no physical camera, lens, solar run-time, housing, or wildlife field tests have yet been passed. The existing software HLS viewer and vision edge-agent reference do not imply production camera provisioning or cloud video relay.
+
 ## Architecture
 
 ```text
