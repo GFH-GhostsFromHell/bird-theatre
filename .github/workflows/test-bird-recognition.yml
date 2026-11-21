@@ -1,0 +1,25 @@
+name: Test Live Bird Recognition Event Pipeline
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'edge-agent/**'
+      - '.github/workflows/test-bird-recognition.yml'
+      - 'portal/src/main/java/ca/gfh/birdtheatre/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test tracker and offline delivery without model downloads
+        run: python -m unittest discover -s edge-agent/tests -v
+      - name: Compile Python sources
+        run: python -m compileall -q edge-agent

@@ -1,0 +1,36 @@
+name: Build iOS Simulator App
+on:
+  push:
+    branches: [main]
+    paths: ['ios-client/**', '.github/workflows/build-ios.yml']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios-client
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate --spec project.yml
+      - name: Build unsigned simulator app
+        run: |
+          xcodebuild -project BirdTheatre.xcodeproj -scheme BirdTheatre -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath .build CODE_SIGNING_ALLOWED=NO build
+      - name: Zip simulator application
+        run: |
+          ditto -c -k --keepParent .build/Build/Products/Debug-iphonesimulator/BirdTheatre.app \
+            .build/BirdTheatre-iOS-Simulator.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BirdTheatre-iOS-Simulator
+          path: ios-client/.build/BirdTheatre-iOS-Simulator.zip
+# App Store/TestFlight requires Apple signing, distribution provisioning and review.

@@ -1,0 +1,26 @@
+name: Build and Test Web Portal
+on:
+  push:
+    branches: [main]
+    paths: ['portal/**', 'Dockerfile', 'render.yaml', '.github/workflows/build-web.yml']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Run API tests and package portal
+        run: mvn -B -f portal/pom.xml clean verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BirdTheatre-Web-jar
+          path: portal/target/bird-theatre-*.jar
