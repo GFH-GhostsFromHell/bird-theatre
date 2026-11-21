@@ -72,3 +72,15 @@ The Windows build workflow runs `UpdateServiceSelfTest` against a locally genera
 - The app currently restarts after a successful update; it does **not** silently replace the running application while you are watching a stream. This avoids interrupting a live bird camera session or replacing in-use files.
 - The initial download/installer have not been exercised in a live Windows MSI test on this development machine.
 - Code signing the MSI with Authenticode and adding update rollback/repair testing are recommended before a public user launch.
+
+## Desktop startup troubleshooting
+
+If Windows reports an error when you open Bird Theatre, first install the newest MSI build rather than reusing an older artifact. The launcher now writes Java startup diagnostics to:
+
+`%LOCALAPPDATA%\BirdTheatre\desktop-startup.log`
+
+Use **Win+R** and paste that path to open it, then copy the last lines if the app still fails. Windows Installer log files for staged updates are separate: `%LOCALAPPDATA%\BirdTheatre\updates\installer.log`.
+
+The desktop shell can now open even if the remote portal at `https://bird-theatre.onrender.com` is not available; in that case it shows a connection/retry screen. This does not mean the community livestream backend has been deployed. A working live community experience requires a separately deployed and configured portal.
+
+The Windows workflow runs the packaged launcher using `--package-self-test` and checks that its JavaFX and HTTP classes load from the bundled runtime. It is **not** a substitute for opening the final MSI on a real Windows desktop, so please report any remaining Windows error text or screenshot.
