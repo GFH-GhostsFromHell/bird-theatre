@@ -80,6 +80,33 @@ jobs:
           Copy-Item $msi.FullName target/installer/BirdTheatre-Windows-Setup.msi
           Get-FileHash target/installer/BirdTheatre-Windows-Setup.msi -Algorithm SHA256 | Format-Table
 
+      - name: Verify packaged Windows launcher and bundled JavaFX runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path target/smoke | Out-Null
+          $args = @(
+            '--type', 'app-image',
+            '--name', 'BirdTheatre',
+            '--app-version', $env:APP_VERSION,
+            '--input', 'target/jpackage-input',
+            '--main-jar', 'bird-theatre-desktop-0.1.0.jar',
+            '--main-class', 'ca.gfh.birdtheatre.Launcher',
+            '--dest', 'target/smoke',
+            '--add-modules', 'jdk.crypto.ec,java.net.http,jdk.jsobject,java.desktop',
+            '--java-options', "-Dbirdtheatre.version=$env:APP_VERSION"
+          )
+          & jpackage @args
+          if ($LASTEXITCODE -ne 0) { throw 'Packaged app-image build failed' }
+          $exe = 'target/smoke/BirdTheatre/BirdTheatre.exe'
+          if (-not (Test-Path $exe)) { throw 'Bundled Windows launcher was not generated' }
+          & $exe '--package-self-test'
+          if ($LASTEXITCODE -ne 0) { throw "Packaged JavaFX self-test failed: $LASTEXITCODE" }
+          $log = Join-Path $env:LOCALAPPDATA 'BirdTheatre/desktop-startup.log'
+          if (-not (Test-Path $log)) { throw 'Packaged launcher failed to create startup diagnostics' }
+          if ((Get-Content -LiteralPath $log -Raw) -notmatch 'Packaged runtime self-test passed') {
+            throw 'Bundled launcher could not load its JavaFX and HTTP runtime components'
+          }
+
       - name: Upload MSI installer from each successful build
         uses: actions/upload-artifact@v4
         with:
