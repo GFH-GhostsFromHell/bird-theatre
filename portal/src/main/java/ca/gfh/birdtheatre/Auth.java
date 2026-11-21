@@ -10,6 +10,7 @@ import java.util.HexFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -18,7 +19,12 @@ class Auth {
     private final SessionRepo sessions;
     private final BCryptPasswordEncoder password = new BCryptPasswordEncoder(12);
     private final SecureRandom random = new SecureRandom();
-    Auth(AccountRepo accounts, SessionRepo sessions) { this.accounts=accounts;this.sessions=sessions; }
+    private final boolean legacySignupEnabled;
+    Auth(AccountRepo accounts, SessionRepo sessions,
+         @Value("${bird.auth.legacy-signup-enabled:false}") boolean legacySignupEnabled) {
+        this.accounts=accounts;this.sessions=sessions;
+        this.legacySignupEnabled=legacySignupEnabled;
+    }
     String secret() {
         byte[] bytes = new byte[32]; random.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
@@ -40,6 +46,8 @@ class Auth {
         try { return require(authHeader); } catch (ResponseStatusException e) { return null; }
     }
     Object signup(String handle, String name, String pass) {
+        if (!legacySignupEnabled) throw new ResponseStatusException(HttpStatus.GONE,
+            "Use verified account registration instead");
         handle=handle.toLowerCase(java.util.Locale.ROOT).trim();
         if (accounts.findByHandle(handle).isPresent())
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Handle already taken");
@@ -50,6 +58,8 @@ class Auth {
         Account a=accounts.findByHandle(handle.toLowerCase(java.util.Locale.ROOT).trim())
             .orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials"));
         if (!password.matches(pass,a.passwordHash)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials");
+        if (a.email!=null && !a.email.isBlank() && !Boolean.TRUE.equals(a.emailVerified))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Verify your email to sign in");
         return session(a);
     }
     Object session(Account a) {

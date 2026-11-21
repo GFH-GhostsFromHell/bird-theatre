@@ -4,8 +4,19 @@ import java.time.Instant;
 import java.util.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface AccountRepo extends JpaRepository<Account, UUID> { Optional<Account> findByHandle(String handle); }
-interface SessionRepo extends JpaRepository<AccountSession, UUID> { Optional<AccountSession> findByTokenHashAndExpiresAtAfter(String tokenHash, Instant now); }
+interface AccountRepo extends JpaRepository<Account, UUID> {
+    Optional<Account> findByHandle(String handle);
+    Optional<Account> findByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCase(String email);
+}
+interface AccountActionRepo extends JpaRepository<AccountActionCode, UUID> {
+    Optional<AccountActionCode> findByHandleAndPurpose(String handle,String purpose);
+    void deleteByHandleAndPurpose(String handle,String purpose);
+}
+interface SessionRepo extends JpaRepository<AccountSession, UUID> {
+    Optional<AccountSession> findByTokenHashAndExpiresAtAfter(String tokenHash, Instant now);
+    void deleteByOwnerId(UUID ownerId);
+}
 interface CameraRepo extends JpaRepository<Camera, UUID> {
     List<Camera> findByPublicListingTrueOrderByCreatedAtDesc();
     List<Camera> findByOwnerIdOrderByCreatedAtDesc(UUID ownerId);

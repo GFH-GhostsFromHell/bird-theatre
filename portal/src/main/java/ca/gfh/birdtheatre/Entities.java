@@ -9,6 +9,11 @@ class Account {
     @Id @GeneratedValue(strategy=GenerationType.UUID) UUID id;
     @Column(nullable=false, length=32) String handle;
     @Column(nullable=false, length=80) String displayName;
+    @Column(length=254, unique=true) String email;
+    Boolean emailVerified;
+    @Column(length=80) String region="";
+    @Column(length=420) String bio="";
+    Boolean publicProfile=false;
     @Column(nullable=false) String passwordHash;
     @Column(nullable=false) Instant joinedAt=Instant.now();
     protected Account() {}
@@ -92,4 +97,19 @@ class BirdNotification {
     @Column(nullable=false,length=255) String message;
     @Column(nullable=false) Instant createdAt=Instant.now();
     protected BirdNotification() {}
+}
+
+@Entity @Table(name="account_action_codes", uniqueConstraints=@UniqueConstraint(columnNames={"handle","purpose"}))
+class AccountActionCode {
+    @Id @GeneratedValue(strategy=GenerationType.UUID) UUID id;
+    @Column(nullable=false,length=32) String handle;
+    @Column(nullable=false,length=16) String purpose;
+    @Column(nullable=false,length=254) String email;
+    @Column(length=80) String displayName;
+    String passwordHash;
+    @Column(nullable=false) String codeHash;
+    @Column(nullable=false) Instant createdAt=Instant.now();
+    @Column(nullable=false) Instant expiresAt;
+    @Column(nullable=false) int attempts=0;
+    protected AccountActionCode() {}
 }

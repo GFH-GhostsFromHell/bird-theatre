@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest @AutoConfigureMockMvc
+@SpringBootTest(properties="bird.auth.legacy-signup-enabled=true") @AutoConfigureMockMvc
 class DetectionIngestionTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
