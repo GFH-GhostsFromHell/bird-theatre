@@ -19,10 +19,9 @@ public class BirdTheatreDesktop extends Application {
     private final UpdateService updater = new UpdateService();
 
     @Override public void start(Stage stage) {
-        if (!URI.create(origin).getScheme().equals("https"))
-            throw new IllegalArgumentException("Portal URL must be HTTPS");
-        WebView browser = new WebView();
-        browser.getEngine().load(origin + "/#explore");
+        DesktopDiagnostics.event("JavaFX start entered");
+        javafx.scene.layout.StackPane viewer = new javafx.scene.layout.StackPane();
+        showMessage(viewer, "Opening Bird Theatre", "Connecting to the community portal…", "explore");
 
         HBox header = new HBox(10);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -36,7 +35,7 @@ public class BirdTheatreDesktop extends Application {
                 {"sightings", "Visits"}, {"alerts", "Alerts"}, {"rfid", "RFID"}}) {
             Button button = new Button(page[1]);
             button.setStyle("-fx-background-color: #dae9d8; -fx-background-radius: 15; -fx-font-size: 12px;");
-            button.setOnAction(event -> browser.getEngine().load(origin + "/#" + page[0]));
+            button.setOnAction(event -> loadPortal(viewer, page[0]));
             header.getChildren().add(button);
         }
         Button openBrowser = new Button("Open browser ↗");
@@ -61,21 +60,94 @@ public class BirdTheatreDesktop extends Application {
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.setStyle("-fx-background-color: #e8f1e6;");
 
-        BorderPane root = new BorderPane(browser);
+        BorderPane root = new BorderPane(viewer);
         root.setTop(header);
         root.setBottom(footer);
         Scene scene = new Scene(root, 1150, 760, Color.WHITE);
         stage.setTitle("Bird Theatre — Wildlife community · v" + updater.currentVersion());
         stage.setScene(scene);
         stage.show();
+        DesktopDiagnostics.event("JavaFX window displayed successfully");
+        loadPortal(viewer, "explore");
 
         updater.start(status -> Platform.runLater(() -> updateStatus.setText(status)),
             () -> Platform.runLater(() -> installNow.setVisible(true)));
     }
 
+    /** A failed server connection does not prevent the native desktop window from opening. */
+    private void loadPortal(javafx.scene.layout.StackPane container, String section) {
+        showMessage(container, "Connecting to Bird Theatre", "Checking the community web service…", section);
+        URI address;
+        try {
+            address = URI.create(origin);
+            if (!"https".equalsIgnoreCase(address.getScheme())
+                || address.getHost() == null || address.getRawUserInfo() != null)
+                throw new IllegalArgumentException("A secure HTTPS portal URL is required");
+        } catch (Exception invalid) {
+            DesktopDiagnostics.report("portal configuration", invalid);
+            showMessage(container, "Portal URL needs attention",
+                "The desktop app is installed, but its portal address is invalid.", section);
+            return;
+        }
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder(address)
+            .timeout(java.time.Duration.ofSeconds(8)).GET().build();
+        java.net.http.HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(5))
+            .followRedirects(java.net.http.HttpClient.Redirect.NORMAL).build()
+            .sendAsync(request, java.net.http.HttpResponse.BodyHandlers.discarding())
+            .whenComplete((response, error) -> Platform.runLater(() -> {
+                if (error != null || response == null || response.statusCode() >= 400) {
+                    String reason = error != null ? "Cloud service could not be reached"
+                        : "Server returned HTTP " + response.statusCode();
+                    DesktopDiagnostics.event("Portal unavailable: " + reason);
+                    showMessage(container, "Bird Theatre desktop is installed",
+                        reason + ". The web portal may not be deployed yet. "
+                        + "Retry when the community service is ready.", section);
+                    return;
+                }
+                try {
+                    WebView browser = new WebView();
+                    browser.getEngine().getLoadWorker().stateProperty().addListener((o, a, state) -> {
+                        if (state == javafx.concurrent.Worker.State.FAILED) {
+                            Throwable failure = browser.getEngine().getLoadWorker().getException();
+                            if (failure != null) DesktopDiagnostics.report("web page", failure);
+                            showMessage(container, "Unable to load the page",
+                                "Please check your connection and retry.", section);
+                        }
+                    });
+                    container.getChildren().setAll(browser);
+                    browser.getEngine().load(origin.replaceAll("/+$", "") + "/#" + section);
+                    DesktopDiagnostics.event("Web view created: " + section);
+                } catch (Throwable failure) {
+                    DesktopDiagnostics.report("web view", failure);
+                    showMessage(container, "Built-in browser could not start",
+                        "See the diagnostic log at " + DesktopDiagnostics.logPath(), section);
+                }
+            }));
+    }
+
+    private void showMessage(javafx.scene.layout.StackPane container,
+                             String heading, String detail, String section) {
+        Label title = new Label(heading);
+        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #123b2c");
+        title.setWrapText(true);
+        Label body = new Label(detail);
+        body.setStyle("-fx-font-size: 15px; -fx-text-fill: #38554a");
+        body.setWrapText(true);
+        body.setMaxWidth(620);
+        Button retry = new Button("Retry connection");
+        retry.setOnAction(e -> loadPortal(container, section));
+        javafx.scene.layout.VBox area = new javafx.scene.layout.VBox(16, title, body, retry);
+        area.setAlignment(Pos.CENTER);
+        area.setPadding(new Insets(32));
+        area.setStyle("-fx-background-color: #f3f8f0");
+        container.getChildren().setAll(area);
+    }
+
     @Override public void stop() {
         updater.stop();
         updater.installStagedAfterExit();
+        DesktopDiagnostics.event("Desktop exited normally");
     }
 
     public static void main(String[] args) { launch(args); }
