@@ -28,8 +28,8 @@ async function api(path, options = {}) {
   const result = await fetch(`/api/v1${path}`, {...options, headers});
   const data = await result.json().catch(() => ({}));
   if (!result.ok) {
-    if (result.status === 401 && path !== '/auth/login') { profile = null; token = ''; sessionStorage.removeItem(tokenKey); renderMember(); }
-    throw new Error({400:'Please check your details or stream URL.',401:'Please sign in again.',403:'Only the station owner can do this.',404:'That bird station was not found.',409:'This name or RFID tag is already registered.'}[result.status] || data.detail || 'Request failed.');
+    if (result.status === 401 && path.startsWith('/me') && path !== '/me/password') { profile = null; token = ''; sessionStorage.removeItem(tokenKey); renderMember(); }
+    throw new Error(data.message || data.detail || {400:'Please check your details.',401:'Invalid credentials or expired session.',403:'Access denied.',404:'The requested item was not found.',409:'This name or email is already registered.',429:'Please wait a minute before trying again.',503:'This service is not configured yet.'}[result.status] || 'Request failed (HTTP '+result.status+').');
   }
   return data;
 }
@@ -66,25 +66,167 @@ function submitForm(form,handler,label='Save'){
 function requiresLogin(){if(profile)return true; openAuth('login'); toast('Sign in to use your bird station tools.'); return false;}
 function renderMember(){
   const slot=$('#member-actions');slot.replaceChildren();
-  if(profile){const pill=node('div','user-pill');pill.append(node('span','user-avatar',profile.displayName[0]?.toUpperCase()||'B'),node('span','',profile.displayName),btn('Sign out',async()=>{try{await api('/auth/logout',{method:'POST'});}catch(e){}token='';profile=null;sessionStorage.removeItem(tokenKey);renderMember();location.hash='#explore';route();},'text-button'));slot.append(pill);}
-  else slot.append(btn('Join the community',()=>openAuth('signup'),'small-button'));
+  if(profile){
+    const pill=node('div','user-pill');
+    pill.append(node('span','user-avatar',profile.displayName[0]?.toUpperCase()||'B'),
+      node('span','',profile.displayName),
+      btn('My profile',()=>{location.hash='#profile';},'small-button'),
+      btn('Sign out',async()=>{
+        try{await api('/auth/logout',{method:'POST'});}catch(e){}
+        token='';profile=null;sessionStorage.removeItem(tokenKey);
+        renderMember();location.hash='#explore';route();
+      },'text-button'));
+    slot.append(pill);
+  }else{
+    slot.append(btn('Sign in',()=>openAuth('login'),'text-button'));
+    slot.append(btn('Create account',()=>openAuth('signup'),'small-button'));
+  }
 }
 function openDialog(content){modalBody.replaceChildren();modalBody.append(content);modal.showModal();}
 function closeDialog(){modal.close();}
 $('#close-modal').onclick=closeDialog;
 modal.addEventListener('click',event=>{if(event.target===modal)closeDialog();});
 function openAuth(mode='login'){
-  const root=node('div');root.append(node('h2','','Your own window into nature'),node('p','','Create a free member account to share your bird cameras and track visitors.'));
+  const titles={login:'Welcome back',signup:'Join Bird Theatre',verify:'Verify your email',
+    recover:'Reset your password',reset:'Set a new password',username:'Find your username'};
+  const root=node('div','account-dialog');
+  root.append(node('h2','',titles[mode]||'Account access'));
+  root.append(node('p','','One account for Bird Theatre on Windows, Android, iPhone and the web.'));
   const tabs=node('div','auth-tabs');
-  tabs.append(btn('Sign in',()=>openAuth('login'),mode==='login'?'current':''),btn('Create account',()=>openAuth('signup'),mode==='signup'?'current':''));root.append(tabs);
-  const form=node('form','form-grid');form.append(formField('Username','handle','text','birdwatcher'));
-  if(mode==='signup')form.append(formField('Display name','displayName','text','How the community sees you'));
-  form.append(formField('Password','password','password','Minimum 10 characters'));
-  submitForm(form,async(input)=>{
-    const result=await api(mode==='signup'?'/auth/signup':'/auth/login',{method:'POST',body:JSON.stringify(input)});
-    token=result.token;sessionStorage.setItem(tokenKey,token);profile={handle:result.handle,displayName:result.displayName};
-    closeDialog();renderMember();toast(`Welcome ${profile.displayName}!`);route();
-  },mode==='signup'?'Create my account':'Sign in');root.append(form);openDialog(root);
+  for(const [name,label] of [['login','Sign in'],['signup','Create'],['verify','Verify'],['recover','Recover']]){
+    tabs.append(btn(label,()=>openAuth(name),name===mode?'current':''));
+  }
+  root.append(tabs);
+  const form=node('form','form-grid');form.setAttribute('autocomplete','on');
+  const add=(label,key,type='text',placeholder='',required=true,value='')=>{
+    const field=formField(label,key,type,placeholder,value);
+    field.querySelector('input').required=required; form.append(field);return field;
+  };
+  if(mode==='signup'){
+    add('Username','handle','text','3–32 letters, numbers or underscores');
+    add('Display name','displayName','text','Your community name');
+    add('Email address','email','email','you@example.com');
+    add('Password','password','password','At least 12 characters');
+    add('Confirm password','confirmPassword','password','Re-enter password');
+    root.append(node('p','helper','A six-digit code will be sent by email to activate your new account.'));
+    submitForm(form,async input=>{
+      if(input.password!==input.confirmPassword)throw Error('Passwords do not match.');
+      delete input.confirmPassword;
+      const response=await api('/auth/register/start',{method:'POST',body:JSON.stringify(input)});
+      closeDialog();
+      openAuth('verify');
+      const handle=$('#field-handle',modalBody);if(handle)handle.value=response.handle;
+      toast(response.message||'Check your inbox for a verification code.');
+    },'Send verification email');
+  }else if(mode==='verify'){
+    add('Username','handle','text','Your account username');
+    add('Six-digit verification code','code','text','123456');
+    submitForm(form,async input=>{
+      const response=await api('/auth/register/verify',{method:'POST',body:JSON.stringify(input)});
+      token=response.token;sessionStorage.setItem(tokenKey,token);
+      profile=await api('/me/profile');
+      closeDialog();renderMember();toast('Your account is verified and ready.');
+      location.hash='#profile';route();
+    },'Verify and sign in');
+  }else if(mode==='recover'){
+    add('Username or email','account','text','Username or verified email');
+    submitForm(form,async input=>{
+      const response=await api('/auth/recovery/start',{method:'POST',body:JSON.stringify(input)});
+      closeDialog();openAuth('reset');toast(response.message);
+    },'Email me a reset code');
+    root.append(btn('Forgot username?',()=>openAuth('username'),'text-button'));
+  }else if(mode==='reset'){
+    add('Username','handle','text','Your account username');
+    add('Six-digit reset code','code','text','123456');
+    add('New password','newPassword','password','At least 12 characters');
+    submitForm(form,async input=>{
+      await api('/auth/recovery/complete',{method:'POST',body:JSON.stringify(input)});
+      toast('Password changed. Sign in with your new password.');openAuth('login');
+    },'Reset password');
+  }else if(mode==='username'){
+    add('Email address','email','email','Your verified email');
+    submitForm(form,async input=>{
+      const response=await api('/auth/recovery/username',{method:'POST',body:JSON.stringify(input)});
+      toast(response.message);openAuth('login');
+    },'Email my username');
+  }else{
+    add('Username','handle','text','Your Bird Theatre username');
+    add('Password','password','password','Account password');
+    submitForm(form,async input=>{
+      const response=await api('/auth/login',{method:'POST',body:JSON.stringify(input)});
+      token=response.token;sessionStorage.setItem(tokenKey,token);
+      profile=await api('/me/profile');
+      closeDialog();renderMember();toast('Welcome back, '+profile.displayName+'!');
+      location.hash='#profile';route();
+    },'Sign in');
+    root.append(btn('Forgot password?',()=>openAuth('recover'),'text-button'));
+  }
+  root.append(form);openDialog(root);
+}
+
+async function memberProfile(){
+  if(!profile){
+    startPage('Your Bird Theatre account','Sign in or register to manage your profile, bird stations, notifications and saved activity.');
+    const login=btn('Sign in',()=>openAuth('login'),'button secondary');
+    const signup=btn('Create an account',()=>openAuth('signup'),'button ghost');
+    const box=panel('Join the community');box.append(node('p','',
+      'Your Bird Theatre profile works across Windows, Android, iPhone and the web.'));
+    const row=node('div','button-row');row.append(login,signup);box.append(row);app.append(box);return;
+  }
+  const me=await api('/me/profile');
+  profile=me;renderMember();
+  startPage('My profile','Manage the details associated with your Bird Theatre account and what other members can see.');
+  const columns=node('div','two-cols');
+  const identity=panel('Community profile');
+  const form=node('form','form-grid');
+  const displayName=formField('Display name','displayName','text','How members see you',me.displayName);
+  const region=formField('General region','region','text','e.g. Ontario, Canada',me.region||'');
+  region.querySelector('input').required=false;
+  const bio=formField('About me','bio','textarea','Favourite birds, feeders or wildlife interests',me.bio||'');
+  bio.querySelector('textarea').required=false;
+  bio.classList.add('full');
+  form.append(displayName,region,bio);
+  const switchRow=node('label','profile-checkbox');
+  const privacy=node('input');privacy.type='checkbox';privacy.checked=!!me.publicProfile;
+  switchRow.append(privacy,node('span','',
+      'Public member profile (your email is never displayed)'));
+  form.append(switchRow);
+  submitForm(form,async input=>{
+    const saved=await api('/me/profile',{method:'PUT',body:JSON.stringify({
+      displayName:input.displayName,region:input.region||'',
+      bio:input.bio||'',publicProfile:privacy.checked
+    })});
+    profile=saved;renderMember();toast('Your profile is updated.');
+  },'Save profile changes');
+  identity.append(form);
+  const account=panel('Account & privacy');
+  account.append(node('p','profile-label','USERNAME'),node('strong','',me.handle),
+    node('p','profile-label','EMAIL'),node('strong','',me.email||'Legacy account — email not linked'),
+    node('p','helper',me.emailVerified?'Email verified':'Email verification not available for this account'),
+    node('p','profile-label','MEMBER SINCE'),node('strong','',niceTime(me.joinedAt)));
+  if(me.publicProfile)account.append(link('View public profile','#member/'+me.handle));
+  account.append(node('div','notice','Your email address and sign-in credentials are never displayed on public member profiles.'));
+  columns.append(identity,account);app.append(columns);
+  const security=panel('Change password');
+  const pw=node('form','form-grid');
+  pw.append(formField('Current password','currentPassword','password','Current password'));
+  pw.append(formField('New password','newPassword','password','At least 12 characters'));
+  submitForm(pw,async input=>{
+    const response=await api('/me/password',{method:'POST',body:JSON.stringify(input)});
+    token=response.token;sessionStorage.setItem(tokenKey,token);
+    toast('Password changed; other sessions were signed out.');pw.reset();
+  },'Update password');
+  security.append(pw);security.append(node('p','helper','Changing your password signs out other sessions. Password recovery requires a verified email.'));
+  app.append(security);
+}
+
+async function publicMember(handle){
+  const me=await api('/members/'+encodeURIComponent(handle));
+  startPage(me.displayName,me.region||'Bird Theatre community member');
+  const card=panel('About '+me.displayName);
+  card.append(node('p','',me.bio||'This member has not added a biography yet.'));
+  card.append(node('p','helper','Member since '+niceTime(me.joinedAt)));
+  app.append(card);
 }
 function cameraCard(camera,sample=false){
   const item=node('article','camera-card');const art=node('div','card-art'+(camera.kind==='HOUSE'?' house':''));
@@ -260,7 +402,11 @@ async function route(){
   document.querySelectorAll('[data-route]').forEach(item=>item.classList.toggle('active',item.dataset.route===page || (page==='camera' && item.dataset.route==='explore')));
   window.scrollTo({top:0,behavior:'instant'});
   try {
-    if(page==='cameras')await myCameras();else if(page==='sightings')await sightings();
+    if(page==='profile'||page==='account')await memberProfile();
+    else if(page==='member' && id)await publicMember(id);
+    else if(page==='register'){await memberProfile();openAuth('signup');}
+    else if(page==='signin'){await memberProfile();openAuth('login');}
+    else if(page==='cameras')await myCameras();else if(page==='sightings')await sightings();
     else if(page==='alerts')await alerts();else if(page==='rfid')await rfid();
     else if(page==='camera' && id)await cameraDetails(id);else await explore();
   } catch(err){app.replaceChildren(empty('Something interrupted the birds',err.message||'Please try again.','🌦',btn('Retry',route)));}
