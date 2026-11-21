@@ -18,25 +18,32 @@ These screenshots were captured locally from the project's browser UI using samp
 
 ![Bird Theatre phone-sized responsive preview](docs/screenshots/mobile-preview.webp)
 
-## Realistic Bird Theatre prototype concepts
+## Original Bird Theatre prototypes — realistic design gallery
 
-These are the **original realistic product renderings**, not the simplified SVG illustrations. They show the natural-wood fronts, charcoal housings, solar-assisted roofs and proposed BT-CAM placements. **They are design visualizations, not photographs of working or physically tested prototypes.**
+These are the **actual original Bird Theatre concept renders** selected for the prototype proposal, uploaded at their original image dimensions (1,448 × 1,086). The revised birdhouse with its **straight-out removable perch** is also shown. **Click any image to open the full-size version.** These are renderings, not photos of fabricated or physically tested equipment.
 
-| Smart Birdhouse — camera + straight-out observation perch | Circular Smart Feeder — solar canopy + camera |
+### Birdhouses and feeders
+
+| Smart Birdhouse — revised straight-out viewing perch | Original Smart Circular Seed Feeder |
 |:---:|:---:|
-| ![Realistic Bird Theatre birdhouse with solar roof, exterior camera and straight-out removable perch](docs/prototypes/realistic-birdhouse.webp) | ![Realistic Bird Theatre circular seed feeder with clear hopper, solar roof and camera](docs/prototypes/realistic-feeder.webp) |
+| [![Full-resolution Bird Theatre camera birdhouse with straight-out perch, natural timber face and charcoal solar roof](docs/prototypes/birdhouse-straight-perch-full.webp)](docs/prototypes/birdhouse-straight-perch-full.webp) | [![Full-resolution Bird Theatre original circular bird feeder with transparent hopper, solar canopy and camera](docs/prototypes/feeder-original-full.webp)](docs/prototypes/feeder-original-full.webp) |
+| Exterior visitor camera aimed toward the **removable outward-facing perch**, plus a proposed interior nest camera. | Original circular feeder style with the camera aimed toward birds using the feeding ring. |
 
-**Birdhouse use note:** The straight-out perch is a *removable observation accessory only*. Remove it before using the box for cavity nesting; an interior camera monitors the nest floor. The feeder camera must be aimed at the feeding area rather than through the opaque seed column.
+### Remaining original product designs
 
-### Original family and engineering sketches
+| Original Smart Birdhouse (before perch update) | Smart Nesting Box Pro |
+|:---:|:---:|
+| [![Original Bird Theatre Smart Birdhouse product concept](docs/prototypes/birdhouse-original-full.webp)](docs/prototypes/birdhouse-original-full.webp) | [![Original Bird Theatre Smart Nesting Box Pro concept](docs/prototypes/nesting-box-original-full.webp)](docs/prototypes/nesting-box-original-full.webp) |
 
-The other original product types are the **Nesting Box Pro**, **Owl House** and **Modular Observation Post**. The simplified drawing below shows the five-platform family for engineering reference, not as the final product artwork.
+| Original Owl House | Original Modular Observation Post |
+|:---:|:---:|
+| [![Original Bird Theatre owl nesting house concept](docs/prototypes/owl-house-original-full.webp)](docs/prototypes/owl-house-original-full.webp) | [![Original Bird Theatre modular bird observation post with camera and feeding stations](docs/prototypes/observation-post-original-full.webp)](docs/prototypes/observation-post-original-full.webp) |
 
-![Bird Theatre original-series product-family engineering overview](docs/prototypes/original-series-gallery.svg)
+**Important wildlife-design note:** The straight-out perch is proposed only as a **removable observation accessory**. Remove it before making a cavity nest box available for nesting; occupied cavity nest boxes should not have an exterior entrance perch. Cameras and target species will still need optical, safety and environmental testing.
 
-Additional sightline illustrations: [birdhouse exterior and nesting views](docs/prototypes/birdhouse-perch-and-nest.svg) · [circular feeder camera zone](docs/prototypes/circular-feeder-camera-zone.svg).
+**Technical drawings (supporting materials, not replacement product images):** [Birdhouse visitor + nest camera layout](docs/prototypes/birdhouse-perch-and-nest.svg) · [Circular feeder sightline](docs/prototypes/circular-feeder-camera-zone.svg) · [five-product schematic overview](docs/prototypes/original-series-gallery.svg).
 
-[**Read the consolidated hardware prototype proposal (Revision G)**](docs/PROTOTYPE_PROPOSAL.md) for full product requirements, viewing distances, shared BT-CAM electronics, solar/battery options, prototype testing and OEM quotations.
+[**Read the consolidated hardware prototype proposal (Revision G)**](docs/PROTOTYPE_PROPOSAL.md) for camera selection, solar power, viewing angles, prototype testing and manufacturer RFQ requirements.
 
 ## What's included
 
