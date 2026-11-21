@@ -13,15 +13,22 @@ import javafx.scene.paint.Color;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import java.net.URI;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.prefs.Preferences;
 
 public class BirdTheatreDesktop extends Application {
-    private final String origin = System.getProperty("birdtheatre.url", "https://bird-theatre.onrender.com");
+    private static final String DEFAULT_PORTAL = "https://bird-theatre.onrender.com";
+    private final Preferences settings = Preferences.userNodeForPackage(BirdTheatreDesktop.class);
+    private String origin = System.getProperty("birdtheatre.url",
+        settings.get("birdtheatre.portal.url", DEFAULT_PORTAL));
     private final UpdateService updater = new UpdateService();
 
     @Override public void start(Stage stage) {
         DesktopDiagnostics.event("JavaFX start entered");
         javafx.scene.layout.StackPane viewer = new javafx.scene.layout.StackPane();
-        showMessage(viewer, "Opening Bird Theatre", "Connecting to the community portal…", "explore");
+        showMessage(viewer, "Welcome to Bird Theatre", "Connecting to the community account portal…", "account");
 
         HBox header = new HBox(10);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -31,13 +38,16 @@ public class BirdTheatreDesktop extends Application {
         brand.setStyle("-fx-text-fill: white; -fx-font-size: 21px; -fx-font-weight: bold;");
         header.getChildren().add(brand);
         for (String[] page : new String[][]{
-                {"explore", "Explore"}, {"cameras", "My stations"},
+                {"account", "Account"}, {"explore", "Explore"}, {"cameras", "My stations"},
                 {"sightings", "Visits"}, {"alerts", "Alerts"}, {"rfid", "RFID"}}) {
             Button button = new Button(page[1]);
             button.setStyle("-fx-background-color: #dae9d8; -fx-background-radius: 15; -fx-font-size: 12px;");
             button.setOnAction(event -> loadPortal(viewer, page[0]));
             header.getChildren().add(button);
         }
+        Button serverSettings = new Button("Server settings");
+        serverSettings.setOnAction(event -> configurePortal(stage,viewer));
+        header.getChildren().add(serverSettings);
         Button openBrowser = new Button("Open browser ↗");
         openBrowser.setOnAction(event -> {
             try { java.awt.Desktop.getDesktop().browse(URI.create(origin)); }
@@ -68,10 +78,38 @@ public class BirdTheatreDesktop extends Application {
         stage.setScene(scene);
         stage.show();
         DesktopDiagnostics.event("JavaFX window displayed successfully");
-        loadPortal(viewer, "explore");
+        loadPortal(viewer, "account");
 
         updater.start(status -> Platform.runLater(() -> updateStatus.setText(status)),
             () -> Platform.runLater(() -> installNow.setVisible(true)));
+    }
+
+    private void configurePortal(Stage stage,javafx.scene.layout.StackPane viewer) {
+        TextInputDialog dialog = new TextInputDialog(origin);
+        dialog.initOwner(stage);
+        dialog.setTitle("Bird Theatre · Server settings");
+        dialog.setHeaderText("Connect to your Bird Theatre cloud portal");
+        dialog.setContentText("HTTPS portal address:");
+        dialog.showAndWait().ifPresent(value -> {
+            try {
+                String next=value.trim().replaceAll("/+$","");
+                URI address=URI.create(next);
+                if (!"https".equalsIgnoreCase(address.getScheme()) || address.getHost()==null
+                    || address.getRawUserInfo()!=null || address.getRawQuery()!=null
+                    || address.getRawFragment()!=null)
+                    throw new IllegalArgumentException("Enter the HTTPS root URL of your Bird Theatre portal.");
+                origin=next;
+                settings.put("birdtheatre.portal.url",next);
+                DesktopDiagnostics.event("Portal changed to "+next);
+                loadPortal(viewer,"account");
+            } catch(Exception invalid) {
+                Alert notice=new Alert(Alert.AlertType.ERROR,invalid.getMessage(),ButtonType.OK);
+                notice.initOwner(stage);
+                notice.setTitle("Invalid portal URL");
+                notice.setHeaderText("A valid HTTPS server address is required");
+                notice.showAndWait();
+            }
+        });
     }
 
     /** A failed server connection does not prevent the native desktop window from opening. */
@@ -101,8 +139,8 @@ public class BirdTheatreDesktop extends Application {
                         : "Server returned HTTP " + response.statusCode();
                     DesktopDiagnostics.event("Portal unavailable: " + reason);
                     showMessage(container, "Bird Theatre desktop is installed",
-                        reason + ". The web portal may not be deployed yet. "
-                        + "Retry when the community service is ready.", section);
+                        reason + " at " + origin + ". The community backend is not available here yet. "
+                        + "Use Server settings to enter the live portal URL, or retry once the server is deployed.", section);
                     return;
                 }
                 try {
