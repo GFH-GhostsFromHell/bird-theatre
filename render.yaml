@@ -20,3 +20,20 @@ services:
           property: connectionString
       - key: BIRD_DB_SCHEMA
         value: bird_theatre
+      # Securely reference the existing Electrical Workbench Mailjet settings.
+      # Render resolves these values; credentials never enter GitHub or the agent.
+      - key: BIRD_MAILJET_API_KEY
+        fromService:
+          type: web
+          name: remote-javafx-portal
+          envVarKey: SPRING_MAIL_USERNAME
+      - key: BIRD_MAILJET_SECRET_KEY
+        fromService:
+          type: web
+          name: remote-javafx-portal
+          envVarKey: SPRING_MAIL_PASSWORD
+      - key: BIRD_MAIL_FROM
+        fromService:
+          type: web
+          name: remote-javafx-portal
+          envVarKey: MAIL_FROM
